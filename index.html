@@ -1,0 +1,673 @@
+import re
+import glob
+import json
+
+pdf_file = "pdf_extracted.txt"
+image_files = glob.glob("ocr_lista*.txt")
+
+with open(pdf_file, "r", encoding="utf-8") as f:
+    pdf_text = f.read()
+
+pdf_items = {}
+lines = pdf_text.split('\n')
+i = 0
+while i < len(lines):
+    line = lines[i].strip()
+    if line.startswith("ME-") and len(line) >= 9:
+        tag = line
+        num_match = re.search(r'\d{6}', tag)
+        if num_match:
+            num = num_match.group(0)
+            desc = ""
+            hp = ""
+            kw = ""
+            if i+1 < len(lines):
+                desc = lines[i+1].strip()
+            if i+2 < len(lines) and re.match(r'^[\d,]+$', lines[i+2].strip()):
+                hp = lines[i+2].strip()
+            if i+3 < len(lines) and re.match(r'^[\d,]+$', lines[i+3].strip()):
+                kw = lines[i+3].strip()
+            
+            pdf_items[num] = {"tag_me": tag, "desc": desc, "hp": hp, "kw": kw, "source_pdf": "PDF"}
+    i += 1
+
+ocr_items = {}
+for im_file in image_files:
+    with open(im_file, "r", encoding="utf-8") as f:
+        lines = [line.strip() for line in f.readlines() if line.strip()]
+    
+    descs = []
+    tags = []
+    
+    current_desc = ""
+    for line in lines:
+        is_ignored = line in ["CALDEIRA", "SEW-EURODRIVE", "C ONZAS", "C CINZAS", "AREA", "FORNECEDOR", "ALIMENTAÇÃO", "CTE"]
+        
+        tag_match = re.search(r'(RE-\d{6}|VRL-\d{6})(-B)?', line)
+        if tag_match:
+            if current_desc:
+                descs.append(current_desc.strip())
+                current_desc = ""
+            tags.append(tag_match.group(0))
+        elif line.startswith("REDUTOR") or "REDUTOR" in line or line.startswith("NOME DO EQUIPAMENTO"):
+            if current_desc:
+                descs.append(current_desc.strip())
+            current_desc = line
+        elif not is_ignored:
+            if current_desc:
+                current_desc += " " + line
+                
+    if current_desc:
+        descs.append(current_desc.strip())
+
+    for idx, tag in enumerate(tags):
+        num_match = re.search(r'\d{6}', tag)
+        if num_match:
+            num = num_match.group(0)
+            if num not in ocr_items:
+                ocr_items[num] = []
+            
+            desc_ocr = descs[idx] if idx < len(descs) else "-"
+            if desc_ocr.startswith("NOME DO EQUIPAMENTO"):
+                desc_ocr = desc_ocr.replace("NOME DO EQUIPAMENTO", "").strip()
+            if not desc_ocr:
+                desc_ocr = "-"
+                
+            ocr_items[num].append({
+                "tag_re": tag, 
+                "source": im_file.replace('ocr_','').replace('.txt',''), 
+                "desc_ocr": desc_ocr
+            })
+
+all_nums = set(pdf_items.keys()).union(set(ocr_items.keys()))
+
+table_data = []
+
+for num in sorted(all_nums):
+    me_data = pdf_items.get(num)
+    tag_me = me_data["tag_me"] if me_data else "-"
+    desc = me_data["desc"] if me_data else "-"
+    hp = me_data["hp"] if me_data else "-"
+    kw = me_data["kw"] if me_data else "-"
+    
+    re_data_list = ocr_items.get(num, [])
+    if not re_data_list:
+        table_data.append({
+            "tag_me": tag_me,
+            "tag_re": "-",
+            "desc": desc,
+            "desc_ocr": "-",
+            "hp": hp,
+            "kw": kw,
+            "source": "-",
+            "status": "Incompleto"
+        })
+    else:
+        for r in re_data_list:
+            table_data.append({
+                "tag_me": tag_me,
+                "tag_re": r["tag_re"],
+                "desc": desc,
+                "desc_ocr": r["desc_ocr"],
+                "hp": hp,
+                "kw": kw,
+                "source": r["source"],
+                "status": "Completo" if tag_me != "-" else "Apenas Redutor"
+            })
+
+for dt in table_data:
+    if dt["tag_me"] != "-" and dt["tag_re"] == "-":
+        dt["status"] = "Apenas Motor"
+
+html_template = """<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Equipamentos Consolidados | Inpasa</title>
+    <!-- Modern Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --border-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        header {
+            padding: 2.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .logo-area p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 5px;
+            font-weight: 300;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            padding: 2.5rem 5%;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+        }
+        
+        .stat-card:nth-child(1)::before { background: var(--primary); }
+        .stat-card:nth-child(2)::before { background: var(--secondary); }
+        .stat-card:nth-child(3)::before { background: var(--accent); }
+        .stat-card:nth-child(4)::before { background: var(--danger); }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .stat-title {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 0 5% 3rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .filter-select {
+            padding: 1rem 1.5rem;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+        }
+
+        .table-container {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 1000px;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            font-weight: 300;
+            transition: background-color 0.2s;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .tag-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            font-family: 'Space Grotesk', sans-serif;
+            background: rgba(59, 130, 246, 0.1);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        a.tag-badge:hover {
+            background: rgba(59, 130, 246, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+            text-decoration: none;
+        }
+
+        .tag-badge.re-tag {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+        
+        .tag-badge.empty-tag {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.3);
+            font-style: italic;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-completo { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .status-apenas-motor { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .status-apenas-redutor { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .source-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        .source-link:hover {
+            color: #60a5fa;
+            transform: translateX(2px);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        
+        #no-results {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            font-size: 1.1rem;
+        }
+
+        .print-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .print-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.4);
+        }
+
+        @media print {
+            body { 
+                background: white !important; 
+                color: black !important; 
+                display: block; 
+            }
+            .logo-area h1 { -webkit-text-fill-color: black !important; }
+            .logo-area p, .stat-title { color: #555 !important; }
+            header, .controls, .print-btn { display: none !important; }
+            .table-container { 
+                box-shadow: none !important; 
+                border: 1px solid #ddd !important; 
+                background: white !important;
+            }
+            th { 
+                background: #f1f5f9 !important; 
+                color: black !important; 
+                border-bottom: 2px solid #ddd !important;
+            }
+            td { border-bottom: 1px solid #ddd !important; color: black !important; }
+            .stat-card { 
+                border: 1px solid #ddd !important; 
+                background: white !important; 
+                box-shadow: none !important; 
+            }
+            td span { color: black !important; }
+            .status-badge, .tag-badge { 
+                border: 1px solid #ccc !important; 
+                background: transparent !important; 
+                color: black !important; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-area">
+            <h1>INPASA Sync</h1>
+            <p>Dashboard de Consolidação Eletromecânica</p>
+        </div>
+    </header>
+
+    <div class="stats-container">
+        <div class="stat-card fade-in" style="animation-delay: 0.1s">
+            <div class="stat-title">Total de Registros</div>
+            <div class="stat-value" id="total-count">0</div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.2s">
+            <div class="stat-title">Consolidados (Completo)</div>
+            <div class="stat-value" id="complete-count">0</div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.3s">
+            <div class="stat-title">Somente Motor (ME)</div>
+            <div class="stat-value" id="motor-count">0</div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.4s">
+            <div class="stat-title">Somente Redutor (RE/VRL)</div>
+            <div class="stat-value" id="redutor-count">0</div>
+        </div>
+    </div>
+
+    <main class="main-content fade-in" style="animation-delay: 0.5s">
+        <div class="controls">
+            <button class="print-btn" onclick="window.print()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Imprimir
+            </button>
+            <div class="search-bar">
+                <input type="text" class="search-input" id="search-input" placeholder="Pesquisar por TAG, Descrição ou Fonte...">
+            </div>
+            <select class="filter-select" id="status-filter">
+                <option value="all">Status: Todos</option>
+                <option value="Completo">Status: Completo</option>
+                <option value="Apenas Motor">Status: Apenas Motor</option>
+                <option value="Apenas Redutor">Status: Apenas Redutor</option>
+            </select>
+            <select class="filter-select" id="source-filter">
+                <option value="all">Fonte O.C.R.: Todas</option>
+                <option value="lista1.jpeg">lista1.jpeg</option>
+                <option value="lista2.jpeg">lista2.jpeg</option>
+                <option value="lista3.jpeg">lista3.jpeg</option>
+                <option value="lista4.jpeg">lista4.jpeg</option>
+                <option value="lista5.jpeg">lista5.jpeg</option>
+                <option value="lista6.jpeg">lista6.jpeg</option>
+                <option value="-">- (Apenas PDF)</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>TAG Motor (ME)</th>
+                        <th>Descrição do Motor (ME)</th>
+                        <th>TAG Redutor (RE/VRL)</th>
+                        <th>Descrição do Redutor (Imagens)</th>
+                        <th>Potência</th>
+                        <th>Fonte Imagem</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Data will be injected here -->
+                </tbody>
+            </table>
+            <div id="no-results">Nenhum equipamento encontrado com os filtros atuais.</div>
+        </div>
+    </main>
+
+    <script>
+        const tableData = DATA_PLACEHOLDER;
+
+        // Elements
+        const tbody = document.getElementById('table-body');
+        const searchInput = document.getElementById('search-input');
+        const statusFilter = document.getElementById('status-filter');
+        const sourceFilter = document.getElementById('source-filter');
+        const noResults = document.getElementById('no-results');
+        const table = document.getElementById('data-table');
+
+        // Stats elements
+        const totalEl = document.getElementById('total-count');
+        const completeEl = document.getElementById('complete-count');
+        const motorEl = document.getElementById('motor-count');
+        const redutorEl = document.getElementById('redutor-count');
+
+        function renderTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusVal = statusFilter.value;
+            const sourceVal = sourceFilter.value;
+
+            let filtered = tableData.filter(item => {
+                const searchString = (item.tag_me + " " + item.tag_re + " " + item.desc + " " + item.desc_ocr + " " + item.source).toLowerCase();
+                const matchesSearch = searchString.includes(searchTerm);
+                
+                const matchesStatus = statusVal === 'all' || item.status === statusVal;
+                const matchesSource = sourceVal === 'all' || item.source === sourceVal;
+
+                return matchesSearch && matchesStatus && matchesSource;
+            });
+
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                noResults.style.display = 'block';
+                table.style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                table.style.display = 'table';
+                
+                filtered.forEach(item => {
+                    const tr = document.createElement('tr');
+                    
+                    // Status badge class
+                    let statusClass = '';
+                    if (item.status === 'Completo') statusClass = 'status-completo';
+                    else if (item.status === 'Apenas Motor') statusClass = 'status-apenas-motor';
+                    else if (item.status === 'Apenas Redutor') statusClass = 'status-apenas-redutor';
+
+                    // Tag styling
+                    const pdfFile = "35493 - CTR DE EMPREITADA-VersaoImpressao.pdf";
+                    const tagMeHtml = item.tag_me === '-' 
+                        ? `<span class="tag-badge empty-tag">N/A</span>` 
+                        : `<a href="${pdfFile}#search=${item.tag_me}" target="_blank" class="tag-badge" title="Buscar PDF: ${item.tag_me}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                               ${item.tag_me}
+                               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                           </a>`;
+                        
+                    const tagReHtml = item.tag_re === '-' 
+                        ? `<span class="tag-badge empty-tag">N/A</span>` 
+                        : `<span class="tag-badge re-tag">${item.tag_re}</span>`;
+
+                    const potHtml = (item.hp !== '-' && item.hp !== '') ? `${item.hp} HP <br> <small style="color:var(--text-muted)">(${item.kw} KW)</small>` : '-';
+
+                    const sourceHtml = item.source === '-' 
+                        ? `<span style="color: var(--text-muted)">-</span>` 
+                        : `<a href="${item.source}" target="_blank" class="source-link" title="Abrir imagem: ${item.source}">
+                               ${item.source}
+                               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                           </a>`;
+
+                    tr.innerHTML = `
+                        <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                        <td>${tagMeHtml}</td>
+                        <td style="max-width: 250px; font-size: 0.9rem;">${item.desc}</td>
+                        <td>${tagReHtml}</td>
+                        <td style="max-width: 250px; font-size: 0.9rem; color: var(--secondary);">${item.desc_ocr}</td>
+                        <td style="white-space: nowrap;">${potHtml}</td>
+                        <td>${sourceHtml}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        function updateStats() {
+            totalEl.innerText = tableData.length;
+            completeEl.innerText = tableData.filter(d => d.status === 'Completo').length;
+            motorEl.innerText = tableData.filter(d => d.status === 'Apenas Motor').length;
+            redutorEl.innerText = tableData.filter(d => d.status === 'Apenas Redutor').length;
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', renderTable);
+        statusFilter.addEventListener('change', renderTable);
+        sourceFilter.addEventListener('change', renderTable);
+
+        // Init
+        updateStats();
+        renderTable();
+    </script>
+</body>
+</html>
+"""
+
+final_html = html_template.replace("DATA_PLACEHOLDER", json.dumps(table_data))
+
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(final_html)
+
+print("Dashboard gerado com sucesso!")
