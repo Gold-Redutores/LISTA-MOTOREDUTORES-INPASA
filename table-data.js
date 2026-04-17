@@ -1,0 +1,1202 @@
+window.tableData = [
+  {
+    "tag_me": "ME-601010",
+    "tag_re": "-",
+    "desc": "600",
+    "desc_ocr": "-",
+    "hp": "447",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601011",
+    "tag_re": "RE-601011",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 1|",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601012",
+    "tag_re": "RE-601012",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 2",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601013",
+    "tag_re": "RE-601013",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 3",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601014",
+    "tag_re": "RE-601014",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 4",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601015",
+    "tag_re": "RE-601015",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 5",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601016",
+    "tag_re": "RE-601016",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 6",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601017",
+    "tag_re": "RE-601017",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 7",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601018",
+    "tag_re": "-",
+    "desc": "5",
+    "desc_ocr": "-",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601019",
+    "tag_re": "RE-601019",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 8",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601029",
+    "tag_re": "RE-601029",
+    "desc": "2",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 6 - MULTICICLONE",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601030",
+    "tag_re": "RE-601030",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRATIL SF-01 LD - SUPER SEC",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601031",
+    "tag_re": "RE-601031",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-02 LD - SUPER SEC",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601032",
+    "tag_re": "RE-601032",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601035",
+    "tag_re": "RE-601035",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-04 LD - SUPER SEC / PRIM",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601036",
+    "tag_re": "RE-601036",
+    "desc": "2",
+    "desc_ocr": "REDUTOR DA VÁLVULA ROTATIVA PÓS QUEIMA (CINZAS)",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601037",
+    "tag_re": "RE-601037",
+    "desc": "2",
+    "desc_ocr": "REDUTOR DE FULIGEM RETRÁTIL SF-04 LE - SUPER SEC/ PRIM SUPER SEC/ PRIM",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601038",
+    "tag_re": "RE-601038",
+    "desc": "2",
+    "desc_ocr": "REDUTOR DE FULIGEM RETRÁTIL SF-OS LE - SUPER SEC/ PRIM",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601039",
+    "tag_re": "RE-601039",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-0G LD SCREEN",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601040",
+    "tag_re": "RE-601040",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-0G LE SCREEN",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601041",
+    "tag_re": "RE-601041",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-07 LD SCREEN",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601042",
+    "tag_re": "RE-601042",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-07 LE SCREEN",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601043",
+    "tag_re": "RE-601043",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-08 LD FEIXE",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601044",
+    "tag_re": "RE-601044",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-08 LE FEIXE",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601045",
+    "tag_re": "-",
+    "desc": "2",
+    "desc_ocr": "-",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601046",
+    "tag_re": "RE-601046",
+    "desc": "2",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-09 LD FEIXE",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601047",
+    "tag_re": "RE-601047",
+    "desc": "0,5",
+    "desc_ocr": "REDUTOR ELEVADOR DE CANECA 1",
+    "hp": "0,4",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601047",
+    "tag_re": "RE-601047",
+    "desc": "0,5",
+    "desc_ocr": "REDUTOR PLANETARIO ESPARGIDOR",
+    "hp": "0,4",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601048",
+    "tag_re": "RE-601048",
+    "desc": "3",
+    "desc_ocr": "REDUTOR DA ROSCA TRANSPORTADORA DE FULIGEM 1 - PRE / ECO (ME601048)",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601049",
+    "tag_re": "RE-601049",
+    "desc": "3",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 2 - PRE/ECO (ME601049)",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601050",
+    "tag_re": "-",
+    "desc": "3",
+    "desc_ocr": "-",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601051",
+    "tag_re": "RE-601051",
+    "desc": "3",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 3 - MULTICICIONE",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601051",
+    "tag_re": "VRL-601051",
+    "desc": "3",
+    "desc_ocr": "REDUTOR DO MOTOR DA VALVULA ROTATIVA",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601052",
+    "tag_re": "RE-601052",
+    "desc": "3",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 4",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601053",
+    "tag_re": "RE-601053",
+    "desc": "3",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 4 - MULTICICLONE",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601062",
+    "tag_re": "-",
+    "desc": "1,5",
+    "desc_ocr": "-",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601063",
+    "tag_re": "RE-601063",
+    "desc": "1,5",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 15 - MULTICICLONE",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601066",
+    "tag_re": "RE-601066",
+    "desc": "1,5",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 16 - MULTICICLONE",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601067",
+    "tag_re": "-",
+    "desc": "1,5",
+    "desc_ocr": "-",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601068",
+    "tag_re": "-",
+    "desc": "1,5",
+    "desc_ocr": "-",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601069",
+    "tag_re": "-",
+    "desc": "1,5",
+    "desc_ocr": "-",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601070",
+    "tag_re": "RE-601070",
+    "desc": "1,5",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 9 - CSC5",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601071",
+    "tag_re": "RE-601071",
+    "desc": "1,5",
+    "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-09 LE FEIXE",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601072",
+    "tag_re": "RE-601072",
+    "desc": "1",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 1 - FEIXE 1",
+    "hp": "0,7",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601073",
+    "tag_re": "RE-601073",
+    "desc": "1",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 10 - CSC 6",
+    "hp": "0,7",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601076",
+    "tag_re": "RE-601076",
+    "desc": "15",
+    "desc_ocr": "REDUTOR ESPARGIDOR",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601077",
+    "tag_re": "RE-601077",
+    "desc": "15",
+    "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE CINZAS 01",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601078",
+    "tag_re": "RE-601078",
+    "desc": "15",
+    "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601078",
+    "tag_re": "RE-601078",
+    "desc": "15",
+    "desc_ocr": "REDUTOR PLANETARIO ESTEIRA TRANSPORTADORA DE CINZAS 03",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601079",
+    "tag_re": "RE-601079-B",
+    "desc": "15",
+    "desc_ocr": "REDUTOR PLANETARIO ESTEIRA TRANSPORTADORA DE CINZAS 04",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601080",
+    "tag_re": "RE-601080",
+    "desc": "15",
+    "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601080",
+    "tag_re": "RE-601080-B",
+    "desc": "15",
+    "desc_ocr": "REDUTOR PLANETARIO ESTEIRA TRANSPORTADORA DE CINZAS OS",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601081",
+    "tag_re": "RE-601081",
+    "desc": "15",
+    "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE CINZAS 04",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601081",
+    "tag_re": "RE-601081-B",
+    "desc": "15",
+    "desc_ocr": "REDUTOR PLANETARIO ESTEIRA TRANSPORTADORA DE CINZAS 06",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601082",
+    "tag_re": "RE-601082",
+    "desc": "15",
+    "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 9",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601083",
+    "tag_re": "RE-601083",
+    "desc": "15",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM S",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601084",
+    "tag_re": "-",
+    "desc": "15",
+    "desc_ocr": "-",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601085",
+    "tag_re": "RE-601085",
+    "desc": "15",
+    "desc_ocr": "REDUTOR DA ROSCA UMIDIFICADORA 1",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601086",
+    "tag_re": "-",
+    "desc": "3",
+    "desc_ocr": "-",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601108",
+    "tag_re": "-",
+    "desc": "7,5",
+    "desc_ocr": "-",
+    "hp": "5,6",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601109",
+    "tag_re": "-",
+    "desc": "7,5",
+    "desc_ocr": "-",
+    "hp": "5,6",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601129",
+    "tag_re": "VRL-601129",
+    "desc": "1",
+    "desc_ocr": "-",
+    "hp": "0,7",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601129",
+    "tag_re": "RE-601129",
+    "desc": "1",
+    "desc_ocr": "REDUTOR DO MOTOR DA VÁLVULA ROTATIVA PRE AR (CINZAS) 13 - MULTICICLONE",
+    "hp": "0,7",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601130",
+    "tag_re": "RE-601130",
+    "desc": "1",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 11 - PRÉ/ECO 1",
+    "hp": "0,7",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601131",
+    "tag_re": "RE-601131",
+    "desc": "1",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 12 - PRÉ/ECO 2",
+    "hp": "0,7",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601132",
+    "tag_re": "RE-601132",
+    "desc": "1",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 14 - MULTICICLONE",
+    "hp": "0,7",
+    "kw": "-",
+    "source": "lista3.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601201",
+    "tag_re": "RE-601201",
+    "desc": "0,33",
+    "desc_ocr": "REDUTOR DA ROSCA SILO BUSADOR DI (CINZAS) [EQUIPAMENTO]",
+    "hp": "0,24",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601202",
+    "tag_re": "RE-601202",
+    "desc": "0,75",
+    "desc_ocr": "REDUTOR DA ROSCA SILO DOSADOR 01 (CINZAS) [EQUIPAMENTO]",
+    "hp": "0,55",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601203",
+    "tag_re": "RE-601203",
+    "desc": "0,75",
+    "desc_ocr": "REDUTOR ELEVADOR DE CANECA 2 (CINZAS)",
+    "hp": "0,55",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601207",
+    "tag_re": "-",
+    "desc": "0,75",
+    "desc_ocr": "-",
+    "hp": "0,55",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601208",
+    "tag_re": "-",
+    "desc": "0,75",
+    "desc_ocr": "-",
+    "hp": "0,55",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601209",
+    "tag_re": "-",
+    "desc": "15",
+    "desc_ocr": "-",
+    "hp": "11,2",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601210",
+    "tag_re": "RE-601210",
+    "desc": "0,75",
+    "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE CINZAS OS",
+    "hp": "0,55",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601211",
+    "tag_re": "RE-601211",
+    "desc": "1,5",
+    "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE CINZAS 06",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601212",
+    "tag_re": "RE-601212",
+    "desc": "1,5",
+    "desc_ocr": "REDUTOR MOTOR DA ROSCA CINZAS ABAIXO DA GRELHA 01 (CINZAS)",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601213",
+    "tag_re": "RE-601213",
+    "desc": "1,5",
+    "desc_ocr": "REDUTOR MOTOR DA ROSCA CINZAS ABAIXO DA GRELHA 04 (CINZAS)|",
+    "hp": "1,1",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601214",
+    "tag_re": "RE-601214",
+    "desc": "3",
+    "desc_ocr": "REDUTOR MOTOR DA VALVULA DUPLA COMPORTA (CINZAS)",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601215",
+    "tag_re": "RE-601215",
+    "desc": "3",
+    "desc_ocr": "REDUTOR DA ROSCA UMIDIFICADORA 2",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601216",
+    "tag_re": "-",
+    "desc": "3",
+    "desc_ocr": "-",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601217",
+    "tag_re": "RE-601217",
+    "desc": "3",
+    "desc_ocr": "REDUTOR DO MOTOR DA VÁLVULA ROTATIVA FILTRO (CINZAS)",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601218",
+    "tag_re": "-",
+    "desc": "3",
+    "desc_ocr": "-",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601240",
+    "tag_re": "RE-601240",
+    "desc": "4",
+    "desc_ocr": "REDUTOR DO MOTROR TRANSPORTADOR DE CORRENTE ALIMENTAÇÃO - C-601012",
+    "hp": "2,94",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601240",
+    "tag_re": "RE-601240-B",
+    "desc": "4",
+    "desc_ocr": "REDUTOR PLANETARIO DO MOTROR TRANSPORTADOR DE CORRENTE ALIMENTAÇÃO - C-601012",
+    "hp": "2,94",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601241",
+    "tag_re": "RE-601241",
+    "desc": "5",
+    "desc_ocr": "REDUTOR MOTOR TRANSPORTADOR CORRENTE ALIMENTAÇÃO C601013",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601241",
+    "tag_re": "RE-601241",
+    "desc": "5",
+    "desc_ocr": "REDUTOR PLANETARIO MOTOR TRANSPORTADOR CORRENTE ALIMENTAÇÃO C601013",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601242",
+    "tag_re": "RE-601242",
+    "desc": "0,75",
+    "desc_ocr": "REDUTOR DA ROSCA TRANSPORTADORAS CINZAS 01 ALIMENTAÇÃO",
+    "hp": "0,55",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601243",
+    "tag_re": "RE-601243",
+    "desc": "0,75",
+    "desc_ocr": "REDUTOR DA ROSCA TRANSPORTADORAS 02",
+    "hp": "0,55",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601244",
+    "tag_re": "RE-601244",
+    "desc": "0,75",
+    "desc_ocr": "REDUTOR DA ROSCA TRANSPORTADORAS 03",
+    "hp": "0,55",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601245",
+    "tag_re": "RE-601245",
+    "desc": "3",
+    "desc_ocr": "REDUTOR MOTOR TRANSP. CORRENTE",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601245",
+    "tag_re": "RE-601245-B",
+    "desc": "3",
+    "desc_ocr": "REDUTOR PLANETARIO MOTOR TRANSP. CORRENTE RETIRADA CINZAS C601014",
+    "hp": "2,2",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-601246",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DO VENTILADOR DE AR 01",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "ME-601248",
+    "tag_re": "RE-601248",
+    "desc": "5",
+    "desc_ocr": "REDUTOR DO MOTOR TRANSPORTADOR DE CINZAS PARA O ELEVADOR C-601015",
+    "hp": "3,7",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-601249-B",
+    "desc": "-",
+    "desc_ocr": "REDUTOR PLANETARIO DO MOTOR TRANSPORTADOR DE CINZAS PARA O ELEVADOR C-601015",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista2.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-601250",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DO EXAUSTOR DE TRIAGEM",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista6.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "ME-601251",
+    "tag_re": "RE-601251",
+    "desc": "10",
+    "desc_ocr": "REDUTOR DO MOTOR ELEVADOR DE CANECAS DE TRANSPORTE - RETIRADA DE CINZAS",
+    "hp": "7,35",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601252",
+    "tag_re": "RE-601252",
+    "desc": "6",
+    "desc_ocr": "REDUTOR DO MOTOR TRANSPORTADOR HELICOIDAL RETIRADA CINZAS PARA MOEGA CALDEIRA 2",
+    "hp": "4,41",
+    "kw": "-",
+    "source": "lista1.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "ME-601523",
+    "tag_re": "-",
+    "desc": "2",
+    "desc_ocr": "-",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "ME-601524",
+    "tag_re": "-",
+    "desc": "2",
+    "desc_ocr": "-",
+    "hp": "1,5",
+    "kw": "-",
+    "source": "-",
+    "status": "Apenas Motor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631033",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DO MOTOR 3 GRADE VIBR. (MOS01003)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631034",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DO MOTOR 4 GRADE VIBR.",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631075",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DO MOTOR 2 GRADE VIBR. (MO601003)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631103",
+    "desc": "-",
+    "desc_ocr": "REDUTOR ROSCA DE EXTRAÇÃO DO FILTRO (RT-03)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631104",
+    "desc": "-",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 01 (VR-01)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631105",
+    "desc": "-",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA 01 (RT. 01)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631106",
+    "desc": "-",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 02 (VR-02)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista5.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631107",
+    "desc": "-",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA 02 (RT- 02)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631110",
+    "desc": "-",
+    "desc_ocr": "REDUTOR VÁLVULA ROTATIVA (VR- 01)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631211",
+    "desc": "-",
+    "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA (RT-01)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "ME-631506",
+    "tag_re": "RE-631506",
+    "desc": "75",
+    "desc_ocr": "REDUTOR TRANSPORTADORA REDLER TARD/2000 - (TRR631506)",
+    "hp": "55",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Completo"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631507",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DO MOTOR TREMONHA DE ELOS COM TAUSCAS TETD/100",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631507",
+    "desc": "-",
+    "desc_ocr": "REDUTOR PLANETARIO DO MOTOR TREMONHA DE ELOS COM TALISCAS TETD/100",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631508",
+    "desc": "-",
+    "desc_ocr": "REDUTOR CORREIA TRANSPORTADORA TAL 508 TCD 48* (ESTEIRA 08)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631510",
+    "desc": "-",
+    "desc_ocr": "REDUTOR PLANETARIO TREMONHA DE ELOS COM TAUSCAS TETD/100.1/ME631510)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631510",
+    "desc": "-",
+    "desc_ocr": "REDUTOR TREMONHA DE ELOS COM TALISCAS TETD/100.1 (ME631510)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631511",
+    "desc": "-",
+    "desc_ocr": "REDUTOR VENTILAÇÃO FORÇADA - TREMONHA DE ELOS COM TALISCAS TETD/100.1 (ME631511)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista5.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631513",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DA TRANSP. DE CORREIA TCD/48\" 03 (ME631513)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631514",
+    "desc": "-",
+    "desc_ocr": "REDUTOR PENEIRA CLAS. DE DISCOS PCDD/32 01 (ME631514)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631515",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DA PENEIRA CLAS. DE DISCOS PCDD/32 02",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631517",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DA TRANSP. DE CORREIA TCD/48\" 26 (ME631517)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  },
+  {
+    "tag_me": "-",
+    "tag_re": "RE-631546",
+    "desc": "-",
+    "desc_ocr": "REDUTOR DO MOTOR 1 GRADE VIBR. MOEGA 03 (MO601003)",
+    "hp": "-",
+    "kw": "-",
+    "source": "lista4.jpeg",
+    "status": "Apenas Redutor"
+  }
+];
