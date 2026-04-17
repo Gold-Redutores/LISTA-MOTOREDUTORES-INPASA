@@ -1,137 +1,14 @@
-import re
-import glob
-import json
-
-pdf_file = "pdf_extracted.txt"
-image_files = glob.glob("ocr_lista*.txt")
-
-with open(pdf_file, "r", encoding="utf-8") as f:
-    pdf_text = f.read()
-
-pdf_items = {}
-lines = pdf_text.split('\n')
-i = 0
-while i < len(lines):
-    line = lines[i].strip()
-    if line.startswith("ME-") and len(line) >= 9:
-        tag = line
-        num_match = re.search(r'\d{6}', tag)
-        if num_match:
-            num = num_match.group(0)
-            desc = ""
-            hp = ""
-            kw = ""
-            if i+1 < len(lines):
-                desc = lines[i+1].strip()
-            if i+2 < len(lines) and re.match(r'^[\d,]+$', lines[i+2].strip()):
-                hp = lines[i+2].strip()
-            if i+3 < len(lines) and re.match(r'^[\d,]+$', lines[i+3].strip()):
-                kw = lines[i+3].strip()
-            
-            pdf_items[num] = {"tag_me": tag, "desc": desc, "hp": hp, "kw": kw, "source_pdf": "PDF"}
-    i += 1
-
-ocr_items = {}
-for im_file in image_files:
-    with open(im_file, "r", encoding="utf-8") as f:
-        lines = [line.strip() for line in f.readlines() if line.strip()]
-    
-    descs = []
-    tags = []
-    
-    current_desc = ""
-    for line in lines:
-        is_ignored = line in ["CALDEIRA", "SEW-EURODRIVE", "C ONZAS", "C CINZAS", "AREA", "FORNECEDOR", "ALIMENTAÇÃO", "CTE"]
-        
-        tag_match = re.search(r'(RE-\d{6}|VRL-\d{6})(-B)?', line)
-        if tag_match:
-            if current_desc:
-                descs.append(current_desc.strip())
-                current_desc = ""
-            tags.append(tag_match.group(0))
-        elif line.startswith("REDUTOR") or "REDUTOR" in line or line.startswith("NOME DO EQUIPAMENTO"):
-            if current_desc:
-                descs.append(current_desc.strip())
-            current_desc = line
-        elif not is_ignored:
-            if current_desc:
-                current_desc += " " + line
-                
-    if current_desc:
-        descs.append(current_desc.strip())
-
-    for idx, tag in enumerate(tags):
-        num_match = re.search(r'\d{6}', tag)
-        if num_match:
-            num = num_match.group(0)
-            if num not in ocr_items:
-                ocr_items[num] = []
-            
-            desc_ocr = descs[idx] if idx < len(descs) else "-"
-            if desc_ocr.startswith("NOME DO EQUIPAMENTO"):
-                desc_ocr = desc_ocr.replace("NOME DO EQUIPAMENTO", "").strip()
-            if not desc_ocr:
-                desc_ocr = "-"
-                
-            ocr_items[num].append({
-                "tag_re": tag, 
-                "source": im_file.replace('ocr_','').replace('.txt',''), 
-                "desc_ocr": desc_ocr
-            })
-
-all_nums = set(pdf_items.keys()).union(set(ocr_items.keys()))
-
-table_data = []
-
-for num in sorted(all_nums):
-    me_data = pdf_items.get(num)
-    tag_me = me_data["tag_me"] if me_data else "-"
-    desc = me_data["desc"] if me_data else "-"
-    hp = me_data["hp"] if me_data else "-"
-    kw = me_data["kw"] if me_data else "-"
-    
-    re_data_list = ocr_items.get(num, [])
-    if not re_data_list:
-        table_data.append({
-            "tag_me": tag_me,
-            "tag_re": "-",
-            "desc": desc,
-            "desc_ocr": "-",
-            "hp": hp,
-            "kw": kw,
-            "source": "-",
-            "status": "Incompleto"
-        })
-    else:
-        for r in re_data_list:
-            table_data.append({
-                "tag_me": tag_me,
-                "tag_re": r["tag_re"],
-                "desc": desc,
-                "desc_ocr": r["desc_ocr"],
-                "hp": hp,
-                "kw": kw,
-                "source": r["source"],
-                "status": "Completo" if tag_me != "-" else "Apenas Redutor"
-            })
-
-for dt in table_data:
-    if dt["tag_me"] != "-" and dt["tag_re"] == "-":
-        dt["status"] = "Apenas Motor"
-
-html_template = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Equipamentos Consolidados | Inpasa</title>
-    <!-- Modern Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #0f172a;
             --surface: #1e293b;
-            --surface-hover: #334155;
             --primary: #3b82f6;
             --primary-glow: rgba(59, 130, 246, 0.5);
             --secondary: #10b981;
@@ -143,11 +20,7 @@ html_template = """<!DOCTYPE html>
             --border-radius: 16px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Outfit', sans-serif;
@@ -157,7 +30,7 @@ html_template = """<!DOCTYPE html>
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
             background-attachment: fixed;
@@ -165,13 +38,9 @@ html_template = """<!DOCTYPE html>
 
         header {
             padding: 2.5rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border-bottom: 1px solid var(--border);
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -206,7 +75,6 @@ html_template = """<!DOCTYPE html>
             border-radius: var(--border-radius);
             padding: 1.5rem;
             backdrop-filter: blur(10px);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
         }
@@ -216,17 +84,11 @@ html_template = """<!DOCTYPE html>
             position: absolute;
             top: 0; left: 0; width: 100%; height: 4px;
         }
-        
+
         .stat-card:nth-child(1)::before { background: var(--primary); }
         .stat-card:nth-child(2)::before { background: var(--secondary); }
         .stat-card:nth-child(3)::before { background: var(--accent); }
         .stat-card:nth-child(4)::before { background: var(--danger); }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border-color: rgba(255,255,255,0.1);
-        }
 
         .stat-title {
             color: var(--text-muted);
@@ -258,10 +120,10 @@ html_template = """<!DOCTYPE html>
         .search-bar {
             flex: 1;
             min-width: 300px;
-            position: relative;
         }
 
-        .search-input {
+        .search-input,
+        .filter-select {
             width: 100%;
             padding: 1rem 1.5rem;
             border-radius: 30px;
@@ -271,30 +133,11 @@ html_template = """<!DOCTYPE html>
             font-family: inherit;
             font-size: 1rem;
             outline: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
         .filter-select {
-            padding: 1rem 1.5rem;
-            border-radius: 30px;
-            border: 1px solid var(--border);
-            background: rgba(30, 41, 59, 0.8);
-            color: var(--text);
-            font-family: inherit;
-            font-size: 1rem;
-            outline: none;
+            width: auto;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-select:focus {
-            border-color: var(--primary);
         }
 
         .table-container {
@@ -303,7 +146,6 @@ html_template = """<!DOCTYPE html>
             border-radius: var(--border-radius);
             backdrop-filter: blur(10px);
             overflow-x: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         table {
@@ -314,32 +156,19 @@ html_template = """<!DOCTYPE html>
         }
 
         th {
-            background: rgba(15, 23, 42, 0.6);
-            padding: 1.25rem 1.5rem;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 1rem 1.25rem;
             font-weight: 600;
             color: var(--text-muted);
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
 
         td {
-            padding: 1.25rem 1.5rem;
+            padding: 1rem 1.25rem;
             border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-            font-weight: 300;
-            transition: background-color 0.2s;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background: rgba(255,255,255,0.03);
         }
 
         .tag-badge {
@@ -353,14 +182,6 @@ html_template = """<!DOCTYPE html>
             color: #93c5fd;
             border: 1px solid rgba(59, 130, 246, 0.3);
             white-space: nowrap;
-            transition: all 0.2s ease;
-        }
-
-        a.tag-badge:hover {
-            background: rgba(59, 130, 246, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
-            text-decoration: none;
         }
 
         .tag-badge.re-tag {
@@ -368,7 +189,7 @@ html_template = """<!DOCTYPE html>
             color: #6ee7b7;
             border-color: rgba(16, 185, 129, 0.3);
         }
-        
+
         .tag-badge.empty-tag {
             background: rgba(239, 68, 68, 0.1);
             color: #fca5a5;
@@ -390,97 +211,16 @@ html_template = """<!DOCTYPE html>
         .status-apenas-motor { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
         .status-apenas-redutor { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .source-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.2s ease;
-        }
-        .source-link:hover {
-            color: #60a5fa;
-            transform: translateX(2px);
-        }
-        
-        /* Scrollbar styling */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-color); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-        
         #no-results {
             display: none;
             text-align: center;
             padding: 3rem;
             color: var(--text-muted);
-            font-weight: 300;
-            font-size: 1.1rem;
         }
 
-        .print-btn {
-            padding: 0.8rem 1.5rem;
-            border-radius: 30px;
-            border: none;
-            background: var(--primary);
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .print-btn:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px -2px rgba(59, 130, 246, 0.4);
-        }
-
-        @media print {
-            body { 
-                background: white !important; 
-                color: black !important; 
-                display: block; 
-            }
-            .logo-area h1 { -webkit-text-fill-color: black !important; }
-            .logo-area p, .stat-title { color: #555 !important; }
-            header, .controls, .print-btn { display: none !important; }
-            .table-container { 
-                box-shadow: none !important; 
-                border: 1px solid #ddd !important; 
-                background: white !important;
-            }
-            th { 
-                background: #f1f5f9 !important; 
-                color: black !important; 
-                border-bottom: 2px solid #ddd !important;
-            }
-            td { border-bottom: 1px solid #ddd !important; color: black !important; }
-            .stat-card { 
-                border: 1px solid #ddd !important; 
-                background: white !important; 
-                box-shadow: none !important; 
-            }
-            td span { color: black !important; }
-            .status-badge, .tag-badge { 
-                border: 1px solid #ccc !important; 
-                background: transparent !important; 
-                color: black !important; 
-            }
+        @media (max-width: 900px) {
+            .controls { flex-direction: column; }
+            .filter-select { width: 100%; }
         }
     </style>
 </head>
@@ -493,48 +233,27 @@ html_template = """<!DOCTYPE html>
     </header>
 
     <div class="stats-container">
-        <div class="stat-card fade-in" style="animation-delay: 0.1s">
-            <div class="stat-title">Total de Registros</div>
-            <div class="stat-value" id="total-count">0</div>
-        </div>
-        <div class="stat-card fade-in" style="animation-delay: 0.2s">
-            <div class="stat-title">Consolidados (Completo)</div>
-            <div class="stat-value" id="complete-count">0</div>
-        </div>
-        <div class="stat-card fade-in" style="animation-delay: 0.3s">
-            <div class="stat-title">Somente Motor (ME)</div>
-            <div class="stat-value" id="motor-count">0</div>
-        </div>
-        <div class="stat-card fade-in" style="animation-delay: 0.4s">
-            <div class="stat-title">Somente Redutor (RE/VRL)</div>
-            <div class="stat-value" id="redutor-count">0</div>
-        </div>
+        <div class="stat-card"><div class="stat-title">Total de Registros</div><div class="stat-value" id="total-count">0</div></div>
+        <div class="stat-card"><div class="stat-title">Consolidados (Completo)</div><div class="stat-value" id="complete-count">0</div></div>
+        <div class="stat-card"><div class="stat-title">Somente Motor (ME)</div><div class="stat-value" id="motor-count">0</div></div>
+        <div class="stat-card"><div class="stat-title">Somente Redutor (RE/VRL)</div><div class="stat-value" id="redutor-count">0</div></div>
     </div>
 
-    <main class="main-content fade-in" style="animation-delay: 0.5s">
+    <main class="main-content">
         <div class="controls">
-            <button class="print-btn" onclick="window.print()">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Imprimir
-            </button>
             <div class="search-bar">
-                <input type="text" class="search-input" id="search-input" placeholder="Pesquisar por TAG, Descrição ou Fonte...">
+                <input type="text" class="search-input" id="search-input" placeholder="Pesquisar por TAG, descrição ou fonte...">
             </div>
+
             <select class="filter-select" id="status-filter">
                 <option value="all">Status: Todos</option>
                 <option value="Completo">Status: Completo</option>
                 <option value="Apenas Motor">Status: Apenas Motor</option>
                 <option value="Apenas Redutor">Status: Apenas Redutor</option>
             </select>
+
             <select class="filter-select" id="source-filter">
-                <option value="all">Fonte O.C.R.: Todas</option>
-                <option value="lista1.jpeg">lista1.jpeg</option>
-                <option value="lista2.jpeg">lista2.jpeg</option>
-                <option value="lista3.jpeg">lista3.jpeg</option>
-                <option value="lista4.jpeg">lista4.jpeg</option>
-                <option value="lista5.jpeg">lista5.jpeg</option>
-                <option value="lista6.jpeg">lista6.jpeg</option>
-                <option value="-">- (Apenas PDF)</option>
+                <option value="all">Fonte OCR: Todas</option>
             </select>
         </div>
 
@@ -544,25 +263,22 @@ html_template = """<!DOCTYPE html>
                     <tr>
                         <th>Status</th>
                         <th>TAG Motor (ME)</th>
-                        <th>Descrição do Motor (ME)</th>
+                        <th>Descrição do Motor</th>
                         <th>TAG Redutor (RE/VRL)</th>
-                        <th>Descrição do Redutor (Imagens)</th>
+                        <th>Descrição do Redutor</th>
                         <th>Potência</th>
-                        <th>Fonte Imagem</th>
+                        <th>Fonte</th>
                     </tr>
                 </thead>
-                <tbody id="table-body">
-                    <!-- Data will be injected here -->
-                </tbody>
+                <tbody id="table-body"></tbody>
             </table>
             <div id="no-results">Nenhum equipamento encontrado com os filtros atuais.</div>
         </div>
     </main>
 
     <script>
-        const tableData = DATA_PLACEHOLDER;
+        const tableData = [{"tag_me": "ME-601010", "tag_re": "-", "desc": "600", "desc_ocr": "-", "hp": "447", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601011", "tag_re": "RE-601011", "desc": "5", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 1|", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601012", "tag_re": "RE-601012", "desc": "5", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 2", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601013", "tag_re": "RE-601013", "desc": "5", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 3", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601014", "tag_re": "RE-601014", "desc": "5", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 4", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601015", "tag_re": "RE-601015", "desc": "5", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 5", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601016", "tag_re": "RE-601016", "desc": "5", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 6", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601017", "tag_re": "RE-601017", "desc": "5", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 7", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601018", "tag_re": "-", "desc": "5", "desc_ocr": "-", "hp": "3,7", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601019", "tag_re": "RE-601019", "desc": "5", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 8", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601029", "tag_re": "RE-601029", "desc": "2", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 6 - MULTICICLONE", "hp": "1,5", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601030", "tag_re": "RE-601030", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRATIL SF-01 LD - SUPER SEC", "hp": "1,5", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601031", "tag_re": "RE-601031", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-02 LD - SUPER SEC", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601032", "tag_re": "RE-601032", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601035", "tag_re": "RE-601035", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-04 LD - SUPER SEC / PRIM", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601036", "tag_re": "RE-601036", "desc": "2", "desc_ocr": "REDUTOR DA VÁLVULA ROTATIVA PÓS QUEIMA (CINZAS)", "hp": "1,5", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601037", "tag_re": "RE-601037", "desc": "2", "desc_ocr": "REDUTOR DE FULIGEM RETRÁTIL SF-04 LE - SUPER SEC/ PRIM SUPER SEC/ PRIM", "hp": "1,5", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601038", "tag_re": "RE-601038", "desc": "2", "desc_ocr": "REDUTOR DE FULIGEM RETRÁTIL SF-OS LE - SUPER SEC/ PRIM", "hp": "1,5", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601039", "tag_re": "RE-601039", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-0G LD SCREEN", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601040", "tag_re": "RE-601040", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-0G LE SCREEN", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601041", "tag_re": "RE-601041", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-07 LD SCREEN", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601042", "tag_re": "RE-601042", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-07 LE SCREEN", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601043", "tag_re": "RE-601043", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-08 LD FEIXE", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601044", "tag_re": "RE-601044", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-08 LE FEIXE", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601045", "tag_re": "-", "desc": "2", "desc_ocr": "-", "hp": "1,5", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601046", "tag_re": "RE-601046", "desc": "2", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-09 LD FEIXE", "hp": "1,5", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601047", "tag_re": "RE-601047", "desc": "0,5", "desc_ocr": "REDUTOR ELEVADOR DE CANECA 1", "hp": "0,4", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601047", "tag_re": "RE-601047", "desc": "0,5", "desc_ocr": "REDUTOR PLANETARIO ESPARGIDOR", "hp": "0,4", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601048", "tag_re": "RE-601048", "desc": "3", "desc_ocr": "REDUTOR DA ROSCA TRANSPORTADORA DE FULIGEM 1 - PRE / ECO (ME601048)", "hp": "2,2", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601049", "tag_re": "RE-601049", "desc": "3", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 2 - PRE/ECO (ME601049)", "hp": "2,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601050", "tag_re": "-", "desc": "3", "desc_ocr": "-", "hp": "2,2", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601051", "tag_re": "RE-601051", "desc": "3", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 3 - MULTICICIONE", "hp": "2,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601051", "tag_re": "VRL-601051", "desc": "3", "desc_ocr": "REDUTOR DO MOTOR DA VALVULA ROTATIVA", "hp": "2,2", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601052", "tag_re": "RE-601052", "desc": "3", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 4", "hp": "2,2", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601053", "tag_re": "RE-601053", "desc": "3", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM 4 - MULTICICLONE", "hp": "2,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601062", "tag_re": "-", "desc": "1,5", "desc_ocr": "-", "hp": "1,1", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601063", "tag_re": "RE-601063", "desc": "1,5", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 15 - MULTICICLONE", "hp": "1,1", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601066", "tag_re": "RE-601066", "desc": "1,5", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 16 - MULTICICLONE", "hp": "1,1", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601067", "tag_re": "-", "desc": "1,5", "desc_ocr": "-", "hp": "1,1", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601068", "tag_re": "-", "desc": "1,5", "desc_ocr": "-", "hp": "1,1", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601069", "tag_re": "-", "desc": "1,5", "desc_ocr": "-", "hp": "1,1", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601070", "tag_re": "RE-601070", "desc": "1,5", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 9 - CSC5", "hp": "1,1", "kw": "-", "source": "lista4.jpeg", "status": "Completo"}, {"tag_me": "ME-601071", "tag_re": "RE-601071", "desc": "1,5", "desc_ocr": "REDUTOR SOPRADOR DE FULIGEM RETRÁTIL SF-09 LE FEIXE", "hp": "1,1", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601072", "tag_re": "RE-601072", "desc": "1", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 1 - FEIXE 1", "hp": "0,7", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601073", "tag_re": "RE-601073", "desc": "1", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 10 - CSC 6", "hp": "0,7", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601076", "tag_re": "RE-601076", "desc": "15", "desc_ocr": "REDUTOR ESPARGIDOR", "hp": "11,2", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601077", "tag_re": "RE-601077", "desc": "15", "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE CINZAS 01", "hp": "11,2", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601078", "tag_re": "RE-601078", "desc": "15", "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE", "hp": "11,2", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601078", "tag_re": "RE-601078", "desc": "15", "desc_ocr": "REDUTOR PLANETARIO ESTEIRA TRANSPORTADORA DE CINZAS 03", "hp": "11,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601079", "tag_re": "RE-601079-B", "desc": "15", "desc_ocr": "REDUTOR PLANETARIO ESTEIRA TRANSPORTADORA DE CINZAS 04", "hp": "11,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601080", "tag_re": "RE-601080", "desc": "15", "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE", "hp": "11,2", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601080", "tag_re": "RE-601080-B", "desc": "15", "desc_ocr": "REDUTOR PLANETARIO ESTEIRA TRANSPORTADORA DE CINZAS OS", "hp": "11,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601081", "tag_re": "RE-601081", "desc": "15", "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE CINZAS 04", "hp": "11,2", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601081", "tag_re": "RE-601081-B", "desc": "15", "desc_ocr": "REDUTOR PLANETARIO ESTEIRA TRANSPORTADORA DE CINZAS 06", "hp": "11,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601082", "tag_re": "RE-601082", "desc": "15", "desc_ocr": "REDUTOR DOSADOR DE CAVACOS 9", "hp": "11,2", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601083", "tag_re": "RE-601083", "desc": "15", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA DE FULIGEM S", "hp": "11,2", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601084", "tag_re": "-", "desc": "15", "desc_ocr": "-", "hp": "11,2", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601085", "tag_re": "RE-601085", "desc": "15", "desc_ocr": "REDUTOR DA ROSCA UMIDIFICADORA 1", "hp": "11,2", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601086", "tag_re": "-", "desc": "3", "desc_ocr": "-", "hp": "2,2", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601108", "tag_re": "-", "desc": "7,5", "desc_ocr": "-", "hp": "5,6", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601109", "tag_re": "-", "desc": "7,5", "desc_ocr": "-", "hp": "5,6", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601129", "tag_re": "VRL-601129", "desc": "1", "desc_ocr": "-", "hp": "0,7", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601129", "tag_re": "RE-601129", "desc": "1", "desc_ocr": "REDUTOR DO MOTOR DA VÁLVULA ROTATIVA PRE AR (CINZAS) 13 - MULTICICLONE", "hp": "0,7", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601130", "tag_re": "RE-601130", "desc": "1", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 11 - PRÉ/ECO 1", "hp": "0,7", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601131", "tag_re": "RE-601131", "desc": "1", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 12 - PRÉ/ECO 2", "hp": "0,7", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601132", "tag_re": "RE-601132", "desc": "1", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 14 - MULTICICLONE", "hp": "0,7", "kw": "-", "source": "lista3.jpeg", "status": "Completo"}, {"tag_me": "ME-601201", "tag_re": "RE-601201", "desc": "0,33", "desc_ocr": "REDUTOR DA ROSCA SILO BUSADOR DI (CINZAS) [EQUIPAMENTO]", "hp": "0,24", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601202", "tag_re": "RE-601202", "desc": "0,75", "desc_ocr": "REDUTOR DA ROSCA SILO DOSADOR 01 (CINZAS) [EQUIPAMENTO]", "hp": "0,55", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601203", "tag_re": "RE-601203", "desc": "0,75", "desc_ocr": "REDUTOR ELEVADOR DE CANECA 2 (CINZAS)", "hp": "0,55", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601207", "tag_re": "-", "desc": "0,75", "desc_ocr": "-", "hp": "0,55", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601208", "tag_re": "-", "desc": "0,75", "desc_ocr": "-", "hp": "0,55", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601209", "tag_re": "-", "desc": "15", "desc_ocr": "-", "hp": "11,2", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601210", "tag_re": "RE-601210", "desc": "0,75", "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE CINZAS OS", "hp": "0,55", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601211", "tag_re": "RE-601211", "desc": "1,5", "desc_ocr": "REDUTOR ESTEIRA TRANSPORTADORA DE CINZAS 06", "hp": "1,1", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601212", "tag_re": "RE-601212", "desc": "1,5", "desc_ocr": "REDUTOR MOTOR DA ROSCA CINZAS ABAIXO DA GRELHA 01 (CINZAS)", "hp": "1,1", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601213", "tag_re": "RE-601213", "desc": "1,5", "desc_ocr": "REDUTOR MOTOR DA ROSCA CINZAS ABAIXO DA GRELHA 04 (CINZAS)|", "hp": "1,1", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601214", "tag_re": "RE-601214", "desc": "3", "desc_ocr": "REDUTOR MOTOR DA VALVULA DUPLA COMPORTA (CINZAS)", "hp": "2,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601215", "tag_re": "RE-601215", "desc": "3", "desc_ocr": "REDUTOR DA ROSCA UMIDIFICADORA 2", "hp": "2,2", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601216", "tag_re": "-", "desc": "3", "desc_ocr": "-", "hp": "2,2", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601217", "tag_re": "RE-601217", "desc": "3", "desc_ocr": "REDUTOR DO MOTOR DA VÁLVULA ROTATIVA FILTRO (CINZAS)", "hp": "2,2", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601218", "tag_re": "-", "desc": "3", "desc_ocr": "-", "hp": "2,2", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601240", "tag_re": "RE-601240", "desc": "4", "desc_ocr": "REDUTOR DO MOTROR TRANSPORTADOR DE CORRENTE ALIMENTAÇÃO - C-601012", "hp": "2,94", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601240", "tag_re": "RE-601240-B", "desc": "4", "desc_ocr": "REDUTOR PLANETARIO DO MOTROR TRANSPORTADOR DE CORRENTE ALIMENTAÇÃO - C-601012", "hp": "2,94", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601241", "tag_re": "RE-601241", "desc": "5", "desc_ocr": "REDUTOR MOTOR TRANSPORTADOR CORRENTE ALIMENTAÇÃO C601013", "hp": "3,7", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601241", "tag_re": "RE-601241", "desc": "5", "desc_ocr": "REDUTOR PLANETARIO MOTOR TRANSPORTADOR CORRENTE ALIMENTAÇÃO C601013", "hp": "3,7", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601242", "tag_re": "RE-601242", "desc": "0,75", "desc_ocr": "REDUTOR DA ROSCA TRANSPORTADORAS CINZAS 01 ALIMENTAÇÃO", "hp": "0,55", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601243", "tag_re": "RE-601243", "desc": "0,75", "desc_ocr": "REDUTOR DA ROSCA TRANSPORTADORAS 02", "hp": "0,55", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601244", "tag_re": "RE-601244", "desc": "0,75", "desc_ocr": "REDUTOR DA ROSCA TRANSPORTADORAS 03", "hp": "0,55", "kw": "-", "source": "lista6.jpeg", "status": "Completo"}, {"tag_me": "ME-601245", "tag_re": "RE-601245", "desc": "3", "desc_ocr": "REDUTOR MOTOR TRANSP. CORRENTE", "hp": "2,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "ME-601245", "tag_re": "RE-601245-B", "desc": "3", "desc_ocr": "REDUTOR PLANETARIO MOTOR TRANSP. CORRENTE RETIRADA CINZAS C601014", "hp": "2,2", "kw": "-", "source": "lista2.jpeg", "status": "Completo"}, {"tag_me": "-", "tag_re": "RE-601246", "desc": "-", "desc_ocr": "REDUTOR DO VENTILADOR DE AR 01", "hp": "-", "kw": "-", "source": "lista1.jpeg", "status": "Apenas Redutor"}, {"tag_me": "ME-601248", "tag_re": "RE-601248", "desc": "5", "desc_ocr": "REDUTOR DO MOTOR TRANSPORTADOR DE CINZAS PARA O ELEVADOR C-601015", "hp": "3,7", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "-", "tag_re": "RE-601249-B", "desc": "-", "desc_ocr": "REDUTOR PLANETARIO DO MOTOR TRANSPORTADOR DE CINZAS PARA O ELEVADOR C-601015", "hp": "-", "kw": "-", "source": "lista2.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-601250", "desc": "-", "desc_ocr": "REDUTOR DO EXAUSTOR DE TRIAGEM", "hp": "-", "kw": "-", "source": "lista6.jpeg", "status": "Apenas Redutor"}, {"tag_me": "ME-601251", "tag_re": "RE-601251", "desc": "10", "desc_ocr": "REDUTOR DO MOTOR ELEVADOR DE CANECAS DE TRANSPORTE - RETIRADA DE CINZAS", "hp": "7,35", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601252", "tag_re": "RE-601252", "desc": "6", "desc_ocr": "REDUTOR DO MOTOR TRANSPORTADOR HELICOIDAL RETIRADA CINZAS PARA MOEGA CALDEIRA 2", "hp": "4,41", "kw": "-", "source": "lista1.jpeg", "status": "Completo"}, {"tag_me": "ME-601523", "tag_re": "-", "desc": "2", "desc_ocr": "-", "hp": "1,5", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "ME-601524", "tag_re": "-", "desc": "2", "desc_ocr": "-", "hp": "1,5", "kw": "-", "source": "-", "status": "Apenas Motor"}, {"tag_me": "-", "tag_re": "RE-631033", "desc": "-", "desc_ocr": "REDUTOR DO MOTOR 3 GRADE VIBR. (MOS01003)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631034", "desc": "-", "desc_ocr": "REDUTOR DO MOTOR 4 GRADE VIBR.", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631075", "desc": "-", "desc_ocr": "REDUTOR DO MOTOR 2 GRADE VIBR. (MO601003)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631103", "desc": "-", "desc_ocr": "REDUTOR ROSCA DE EXTRAÇÃO DO FILTRO (RT-03)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631104", "desc": "-", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 01 (VR-01)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631105", "desc": "-", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA 01 (RT. 01)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631106", "desc": "-", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA 02 (VR-02)", "hp": "-", "kw": "-", "source": "lista5.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631107", "desc": "-", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA 02 (RT- 02)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631110", "desc": "-", "desc_ocr": "REDUTOR VÁLVULA ROTATIVA (VR- 01)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631211", "desc": "-", "desc_ocr": "REDUTOR ROSCA TRANSPORTADORA (RT-01)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "ME-631506", "tag_re": "RE-631506", "desc": "75", "desc_ocr": "REDUTOR TRANSPORTADORA REDLER TARD/2000 - (TRR631506)", "hp": "55", "kw": "-", "source": "lista4.jpeg", "status": "Completo"}, {"tag_me": "-", "tag_re": "RE-631507", "desc": "-", "desc_ocr": "REDUTOR DO MOTOR TREMONHA DE ELOS COM TAUSCAS TETD/100", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631507", "desc": "-", "desc_ocr": "REDUTOR PLANETARIO DO MOTOR TREMONHA DE ELOS COM TALISCAS TETD/100", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631508", "desc": "-", "desc_ocr": "REDUTOR CORREIA TRANSPORTADORA TAL 508 TCD 48* (ESTEIRA 08)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631510", "desc": "-", "desc_ocr": "REDUTOR PLANETARIO TREMONHA DE ELOS COM TAUSCAS TETD/100.1/ME631510)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631510", "desc": "-", "desc_ocr": "REDUTOR TREMONHA DE ELOS COM TALISCAS TETD/100.1 (ME631510)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631511", "desc": "-", "desc_ocr": "REDUTOR VENTILAÇÃO FORÇADA - TREMONHA DE ELOS COM TALISCAS TETD/100.1 (ME631511)", "hp": "-", "kw": "-", "source": "lista5.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631513", "desc": "-", "desc_ocr": "REDUTOR DA TRANSP. DE CORREIA TCD/48\" 03 (ME631513)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631514", "desc": "-", "desc_ocr": "REDUTOR PENEIRA CLAS. DE DISCOS PCDD/32 01 (ME631514)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631515", "desc": "-", "desc_ocr": "REDUTOR DA PENEIRA CLAS. DE DISCOS PCDD/32 02", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631517", "desc": "-", "desc_ocr": "REDUTOR DA TRANSP. DE CORREIA TCD/48\" 26 (ME631517)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}, {"tag_me": "-", "tag_re": "RE-631546", "desc": "-", "desc_ocr": "REDUTOR DO MOTOR 1 GRADE VIBR. MOEGA 03 (MO601003)", "hp": "-", "kw": "-", "source": "lista4.jpeg", "status": "Apenas Redutor"}];
 
-        // Elements
         const tbody = document.getElementById('table-body');
         const searchInput = document.getElementById('search-input');
         const statusFilter = document.getElementById('status-filter');
@@ -570,21 +286,43 @@ html_template = """<!DOCTYPE html>
         const noResults = document.getElementById('no-results');
         const table = document.getElementById('data-table');
 
-        // Stats elements
         const totalEl = document.getElementById('total-count');
         const completeEl = document.getElementById('complete-count');
         const motorEl = document.getElementById('motor-count');
         const redutorEl = document.getElementById('redutor-count');
+
+        function popularFiltroDeFontes() {
+            const fontes = [...new Set(tableData.map(item => item.source))].sort();
+            fontes.forEach(fonte => {
+                const option = document.createElement('option');
+                option.value = fonte;
+                option.textContent = fonte === '-' ? '- (Apenas PDF)' : fonte;
+                sourceFilter.appendChild(option);
+            });
+        }
+
+        function getStatusClass(status) {
+            if (status === 'Completo') return 'status-completo';
+            if (status === 'Apenas Motor') return 'status-apenas-motor';
+            if (status === 'Apenas Redutor') return 'status-apenas-redutor';
+            return '';
+        }
 
         function renderTable() {
             const searchTerm = searchInput.value.toLowerCase();
             const statusVal = statusFilter.value;
             const sourceVal = sourceFilter.value;
 
-            let filtered = tableData.filter(item => {
-                const searchString = (item.tag_me + " " + item.tag_re + " " + item.desc + " " + item.desc_ocr + " " + item.source).toLowerCase();
+            const filtered = tableData.filter(item => {
+                const searchString = [
+                    item.tag_me,
+                    item.tag_re,
+                    item.desc,
+                    item.desc_ocr,
+                    item.source
+                ].join(' ').toLowerCase();
+
                 const matchesSearch = searchString.includes(searchTerm);
-                
                 const matchesStatus = statusVal === 'all' || item.status === statusVal;
                 const matchesSource = sourceVal === 'all' || item.source === sourceVal;
 
@@ -596,78 +334,55 @@ html_template = """<!DOCTYPE html>
             if (filtered.length === 0) {
                 noResults.style.display = 'block';
                 table.style.display = 'none';
-            } else {
-                noResults.style.display = 'none';
-                table.style.display = 'table';
-                
-                filtered.forEach(item => {
-                    const tr = document.createElement('tr');
-                    
-                    // Status badge class
-                    let statusClass = '';
-                    if (item.status === 'Completo') statusClass = 'status-completo';
-                    else if (item.status === 'Apenas Motor') statusClass = 'status-apenas-motor';
-                    else if (item.status === 'Apenas Redutor') statusClass = 'status-apenas-redutor';
-
-                    // Tag styling
-                    const pdfFile = "35493 - CTR DE EMPREITADA-VersaoImpressao.pdf";
-                    const tagMeHtml = item.tag_me === '-' 
-                        ? `<span class="tag-badge empty-tag">N/A</span>` 
-                        : `<a href="${pdfFile}#search=${item.tag_me}" target="_blank" class="tag-badge" title="Buscar PDF: ${item.tag_me}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                               ${item.tag_me}
-                               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                           </a>`;
-                        
-                    const tagReHtml = item.tag_re === '-' 
-                        ? `<span class="tag-badge empty-tag">N/A</span>` 
-                        : `<span class="tag-badge re-tag">${item.tag_re}</span>`;
-
-                    const potHtml = (item.hp !== '-' && item.hp !== '') ? `${item.hp} HP <br> <small style="color:var(--text-muted)">(${item.kw} KW)</small>` : '-';
-
-                    const sourceHtml = item.source === '-' 
-                        ? `<span style="color: var(--text-muted)">-</span>` 
-                        : `<a href="${item.source}" target="_blank" class="source-link" title="Abrir imagem: ${item.source}">
-                               ${item.source}
-                               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                           </a>`;
-
-                    tr.innerHTML = `
-                        <td><span class="status-badge ${statusClass}">${item.status}</span></td>
-                        <td>${tagMeHtml}</td>
-                        <td style="max-width: 250px; font-size: 0.9rem;">${item.desc}</td>
-                        <td>${tagReHtml}</td>
-                        <td style="max-width: 250px; font-size: 0.9rem; color: var(--secondary);">${item.desc_ocr}</td>
-                        <td style="white-space: nowrap;">${potHtml}</td>
-                        <td>${sourceHtml}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+                return;
             }
+
+            noResults.style.display = 'none';
+            table.style.display = 'table';
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+
+                const tagMeHtml = item.tag_me === '-'
+                    ? '<span class="tag-badge empty-tag">N/A</span>'
+                    : `<span class="tag-badge">${item.tag_me}</span>`;
+
+                const tagReHtml = item.tag_re === '-'
+                    ? '<span class="tag-badge empty-tag">N/A</span>'
+                    : `<span class="tag-badge re-tag">${item.tag_re}</span>`;
+
+                const potHtml = (item.hp && item.hp !== '-')
+                    ? `${item.hp} HP<br><small>(${item.kw} KW)</small>`
+                    : '-';
+
+                tr.innerHTML = `
+                    <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
+                    <td>${tagMeHtml}</td>
+                    <td>${item.desc}</td>
+                    <td>${tagReHtml}</td>
+                    <td>${item.desc_ocr}</td>
+                    <td>${potHtml}</td>
+                    <td>${item.source}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
         }
 
         function updateStats() {
             totalEl.innerText = tableData.length;
-            completeEl.innerText = tableData.filter(d => d.status === 'Completo').length;
-            motorEl.innerText = tableData.filter(d => d.status === 'Apenas Motor').length;
-            redutorEl.innerText = tableData.filter(d => d.status === 'Apenas Redutor').length;
+            completeEl.innerText = tableData.filter(item => item.status === 'Completo').length;
+            motorEl.innerText = tableData.filter(item => item.status === 'Apenas Motor').length;
+            redutorEl.innerText = tableData.filter(item => item.status === 'Apenas Redutor').length;
         }
 
-        // Event Listeners
         searchInput.addEventListener('input', renderTable);
         statusFilter.addEventListener('change', renderTable);
         sourceFilter.addEventListener('change', renderTable);
 
-        // Init
+        popularFiltroDeFontes();
         updateStats();
         renderTable();
     </script>
 </body>
 </html>
-"""
-
-final_html = html_template.replace("DATA_PLACEHOLDER", json.dumps(table_data))
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(final_html)
-
-print("Dashboard gerado com sucesso!")
