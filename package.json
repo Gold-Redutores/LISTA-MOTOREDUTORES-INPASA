@@ -1,8 +1,0 @@
-{
-  "name": "inpasa-dashboard-github-save",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "netlify dev"
-  }
-}
