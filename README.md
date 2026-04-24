@@ -1,16 +1,69 @@
-# Repositório base - Lista de Equipamentos INPASA
+# Cloudflare Pages + D1 - Ferramenta Industrial
 
-## Arquivos
-- `index.html` → interface principal
-- `table-data.js` → dados completos da tabela
-- `gold-redutores.png` → opcional, já embutido no HTML nesta versão
+## O que este projeto resolve
+- Hospedagem estática no Cloudflare Pages
+- API serverless via Pages Functions
+- Banco D1 para:
+  - equipamentos
+  - marcações
+  - ordens de serviço
 
-## Como usar
-1. Suba os arquivos para um repositório no GitHub.
-2. Ative GitHub Pages ou publique no Netlify.
-3. A tabela carregará todos os equipamentos.
-4. A última coluna permite marcar checkboxes.
-5. O botão "Salvar seleção" grava as marcações no navegador local.
+## Por que essa arquitetura é melhor para crescer
+A lista atual tem 120 equipamentos, mas o banco D1 permite aumentar sem reescrever o HTML. Você poderá:
+- reimportar lotes maiores
+- consultar histórico de OS
+- guardar marcações reais
+- evoluir para múltiplos usuários
 
-## Observação
-Os 120 registros foram extraídos do seu arquivo `index(1).html`.
+## Estrutura
+- `index.html`
+- `functions/api/equipamentos.js`
+- `functions/api/selections.js`
+- `functions/api/os.js`
+- `functions/api/import-equipamentos.js`
+- `migrations/0001_schema.sql`
+- `seed/equipamentos.json`
+- `wrangler.jsonc`
+
+## Passo a passo
+
+### 1) Instalar Wrangler
+```bash
+npm install
+```
+
+### 2) Login
+```bash
+npx wrangler login
+```
+
+### 3) Criar banco D1
+```bash
+npx wrangler d1 create inpasa-industrial-db
+```
+
+O comando retorna `database_name` e `database_id`. Coloque esses valores em `wrangler.jsonc`.
+
+### 4) Aplicar schema
+```bash
+npx wrangler d1 execute DB_NAME_PLACEHOLDER --file=./migrations/0001_schema.sql --remote
+```
+
+### 5) Criar projeto no Cloudflare Pages
+No painel Cloudflare Pages, conecte o repositório.
+
+### 6) Vincular o D1 ao Pages
+No projeto Pages:
+Settings > Bindings > Add > D1 database bindings
+Binding name: `DB`
+
+### 7) Importar a lista inicial
+Com o projeto já publicado, faça um POST para:
+`/api/import-equipamentos`
+
+Use o arquivo `seed/equipamentos.json`.
+
+### 8) Testar
+- `/api/equipamentos`
+- `/api/selections`
+- salvar OS no painel
