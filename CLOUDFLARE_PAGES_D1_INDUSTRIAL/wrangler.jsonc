@@ -1,0 +1,12 @@
+{
+  "name": "cloudflare-pages-d1-industrial",
+  "compatibility_date": "2026-04-18",
+  "pages_build_output_dir": ".",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "DB_NAME_PLACEHOLDER",
+      "database_id": "DB_ID_PLACEHOLDER"
+    }
+  ]
+}
